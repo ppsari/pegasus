@@ -28,6 +28,51 @@ const getToken = () => {
   })
 }
 
+const getArcType = async () => {
+  let token = await getToken()
+  let arctype = {
+    method: 'GET',
+    url: 'https://api.mainapi.net/arcgis/0.0.2',
+    headers: {
+      'postman-token': '0d9f59e9-e159-2d1e-69aa-762f49693523',
+      'cache-control': 'no-cache',
+       accept: 'application/json',
+      'content-type': 'application/x-www-form-urlencoded',
+      authorization: token
+    }
+  }
+
+  await request(arctype, function (error, response, body) {
+    body = JSON.parse(body)
+    if (typeof body.layers !== 'undefined') {
+      console.log(body.layers)
+    }
+  })
+}
+
+const getArcLocation = async(po_id, lat, lon) => {
+  let token = await getToken()
+  let arclocation = {
+    method: 'GET',
+    url: `https://api.mainapi.net/arcgis/0.0.2/${po_id}/query/1000?geometry=${lon},${lat}`,
+    headers: {
+      'postman-token': '0d9f59e9-e159-2d1e-69aa-762f49693523',
+      'cache-control': 'no-cache',
+       accept: 'application/json',
+      'content-type': 'application/x-www-form-urlencoded',
+      authorization: token
+    }
+  }
+
+  await request(arclocation, function (error, response, body) {
+    body = JSON.parse(body)
+    if (typeof body.features !== 'undefined') {
+      body.features = body.features.map(feature => feature.geometry)
+      console.log(body.features)
+    }
+  })
+}
+
 const sendMessage = async (phone, content) => {
   console.log('send Msg')
     let res = await getToken()
@@ -82,8 +127,12 @@ const getWifi = async (radius,lat,lon) => {
   } catch(ex) {console.log('tes');console.log(ex)}
 }
 
+// getArcType()
+getArcLocation(3,'-6.2212663', '106.8171743')
 // init()
 module.exports = {
   getWifi,
+  getArcType,
+  getArcLocation,
   sendMessage
 }
